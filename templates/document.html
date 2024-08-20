@@ -1,0 +1,165 @@
+ {% extends "base.html" %}
+
+{% block title %}Logistic Regression Model with Cuisines Data{% endblock %}
+
+{% block content %}
+
+
+<h1 class="card-header  text-center">Cuisine Predictor Model with Cuisines Data</h1>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 1: Importing Libraries and Reading the Data</h2>
+        <p>We start by importing the necessary libraries and reading the data:</p>
+        <pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("cuisines.csv")
+df</code></pre>
+        <p><strong>Explanation:</strong> This code imports necessary libraries: pandas for data manipulation, numpy for numerical operations, and matplotlib for plotting graphs. Then, it reads the CSV file <code>cuisines.csv</code> into a DataFrame <code>df</code>.</p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 2: Visualizing Cuisine Distribution</h2>
+        <p>We can visualize the distribution of different cuisines using a bar chart:</p>
+        <pre><code>df.cuisine.value_counts().plot.barh()</code></pre>
+        <p><strong>Explanation:</strong> The <code>value_counts()</code> method counts the occurrences of each unique value in the cuisine column. The <code>.plot.barh()</code> method then plots this distribution as a horizontal bar chart, showing how many dishes belong to each cuisine.</p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 3: Filtering Data by Specific Cuisines</h2>
+        <p>We create separate DataFrames for specific cuisines:</p>
+        <pre><code>thai_df = df[(df.cuisine == "thai")]
+japanese_df = df[(df.cuisine == "japanese")]
+chinese_df = df[(df.cuisine == "chinese")]
+indian_df = df[(df.cuisine == "indian")]
+korean_df = df[(df.cuisine == "korean")]</code></pre>
+        <p><strong>Explanation:</strong> This code creates separate DataFrames for each specified cuisine (Thai, Japanese, Chinese, Indian, Korean) by filtering the original DataFrame.</p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 4: Creating Ingredient DataFrame for Each Cuisine</h2>
+        <p>Next, we create a DataFrame showing the most common ingredients for each cuisine:</p>
+        <pre><code>def create_ingredient_df(df):
+    ing_df = df.T.drop(['cuisine', 'Unnamed: 0']).sum(axis=1).to_frame('value')
+    ing_df = ing_df[(ing_df.T != 0).any()]
+    ing_df = ing_df.sort_values(by='value', ascending=False, inplace=False)
+    return ing_df
+
+thai_ing_df = create_ingredient_df(thai_df)
+thai_ing_df.head(10).plot.barh()</code></pre>
+        <p><strong>Explanation:</strong> The <code>create_ingredient_df</code> function:
+            <ul>
+                <li>Transposes the DataFrame to switch rows and columns.</li>
+                <li>Drops the <code>cuisine</code> and <code>Unnamed: 0</code> columns, which are not needed for ingredient analysis.</li>
+                <li>Sums the occurrences of each ingredient across all rows (i.e., dishes) and creates a new DataFrame with a single column named <code>value</code>.</li>
+                <li>Filters out ingredients that do not appear in any dish.</li>
+                <li>Sorts the ingredients by their frequency in descending order.</li>
+                <li>Returns the resulting DataFrame.</li>
+            </ul>
+        </p>
+        <p>Visualization: The <code>thai_ing_df.head(10).plot.barh()</code> line visualizes the top 10 ingredients in Thai cuisine as a horizontal bar chart.</p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 5: Preparing Features and Labels for Model Training</h2>
+        <p>We then prepare the features and labels for model training:</p>
+        <pre><code>feature_df = df.drop(["cuisine", "Unnamed: 0", "rice", "garlic", "ginger"], axis=1)
+labels_df = df.cuisine
+feature_df.head()</code></pre>
+        <p><strong>Explanation:</strong>
+            <ul>
+                <li><code>feature_df</code>: This is the DataFrame with features used to predict the cuisine. It drops the <code>cuisine</code> (the target label), <code>Unnamed: 0</code>, and common ingredients like <code>rice</code>, <code>garlic</code>, and <code>ginger</code> from the original DataFrame, as they might not help in differentiating between cuisines.</li>
+                <li><code>labels_df</code>: This contains the <code>cuisine</code> column, which is the target variable for prediction.</li>
+            </ul>
+        </p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 6: Handling Imbalanced Data with SMOTE</h2>
+        <p>To handle imbalanced data, we apply SMOTE:</p>
+        <pre><code>from imblearn.over_sampling import SMOTE
+oversample = SMOTE()
+transformed_feature_df, transformed_label_df = oversample.fit_resample(feature_df, labels_df)
+print(transformed_label_df.value_counts())
+print(labels_df.value_counts())</code></pre>
+        <p><strong>Explanation:</strong> The dataset might have an imbalanced number of samples for each cuisine. SMOTE (Synthetic Minority Over-sampling Technique) is used here to balance the classes by oversampling the minority classes, generating synthetic examples. The new balanced feature and label DataFrames are <code>transformed_feature_df</code> and <code>transformed_label_df</code>.</p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 7: Training a Logistic Regression Model</h2>
+        <p>Now, we train a logistic regression model:</p>
+        <pre><code>from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+x_train, x_test, y_train, y_test = train_test_split(transformed_feature_df, transformed_label_df, test_size=0.3)
+lr = LogisticRegression(multi_class="ovr", solver="liblinear")
+model = lr.fit(x_train, y_train)
+accuracy = model.score(x_test, y_test)
+accuracy</code></pre>
+        <p><strong>Explanation:</strong>
+            <ul>
+                <li><strong>Splitting Data:</strong> The dataset is split into training (70%) and testing (30%) sets.</li>
+                <li><strong>Logistic Regression Model:</strong> A logistic regression model is created with ovr (one-vs-rest) strategy for multiclass classification.</li>
+                <li><strong>Model Training:</strong> The model is trained using the training data.</li>
+                <li><strong>Model Accuracy:</strong> The accuracy of the model on the test data is calculated and printed.</li>
+            </ul>
+        </p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 8: Making Predictions and Evaluating the Model</h2>
+        <p>We can make predictions and evaluate the model's performance:</p>
+        <pre><code>print(x_test.iloc[10][x_test.iloc[10] != 0].keys())
+print(y_test.iloc[10])
+
+test = x_test.iloc[10].values.reshape(-1,1).T
+proba = model.predict_proba(test)
+classes = model.classes_
+resultdf = pd.DataFrame(data=proba, columns=classes)
+resultdf</code></pre>
+        <p><strong>Explanation:</strong>
+            <ul>
+                <li>The code snippet prints out the ingredients present in the 11th test sample and the actual cuisine.</li>
+                <li>The model predicts the probability of each cuisine for the 11th test sample, and the results are stored in <code>resultdf</code>.</li>
+            </ul>
+        </p>
+    </div>
+</div>
+
+<div class="card no-select" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h2>Step 9: Generating a Classification Report</h2>
+        <p>Finally, we generate a classification report to evaluate model performance:</p>
+        <pre><code>from sklearn.metrics import classification_report
+
+y_pred = model.predict(x_test)
+print(classification_report(y_test, y_pred))</code></pre>
+        <p><strong>Explanation:</strong> The <code>classification_report</code> provides a detailed performance evaluation of the model, including precision, recall, and F1-score for each cuisine.</p>
+    </div>
+</div>
+
+<script>
+    // Disable right-click context menu
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+</script>
+
+{% endblock %}

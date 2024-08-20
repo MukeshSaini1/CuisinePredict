@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Cuisine{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header text-center">
+        <h2>Predict the Cuisine</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="cuisineForm" class="mt-4">
+            {% for i in range(1, 6) %}
+            <div class="form-group">
+                <label for="ingredient{{ i }}">Select Ingredient {{ i }}:</label>
+                <select name="ingredient{{ i }}" id="ingredient{{ i }}" class="form-control" required>
+                    <option value="" disabled selected>Select an ingredient</option>
+                    {% for ingredient in ingredients %}
+                        <option value="{{ ingredient }}">{{ ingredient }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Predict Cuisine</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_scripts %}
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    // Form validation: Ensures no two ingredients are the same
+    document.getElementById("cuisineForm").addEventListener("submit", function(event) {
+        let ingredients = [
+            document.getElementById("ingredient1").value,
+            document.getElementById("ingredient2").value,
+            document.getElementById("ingredient3").value,
+            document.getElementById("ingredient4").value,
+            document.getElementById("ingredient5").value
+        ];
+
+        let uniqueIngredients = [...new Set(ingredients)];
+        if (uniqueIngredients.length < 5) {
+            event.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Please select 5 unique ingredients.',
+            });
+        }
+    });
+</script>
+{% endblock %}

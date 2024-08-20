@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}About Us{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header text-center">
+        <h2>About Us</h2>
+    </div>
+    <div class="card-body">
+        <h3>Project Name: Cuisine Classification Model</h3>
+        <p><strong>Submitted To:</strong> [Instructor's Name or Organization]</p>
+        <p><strong>Submitted By:</strong> [Your Name or Team Name]</p>
+        <p><strong>Submission Date:</strong> [Submission Date]</p>
+
+        <h4>Project Description</h4>
+        <p>
+            The Cuisine Classification Model is a machine learning project aimed at predicting the type of cuisine based on the ingredients used in various dishes. This project involves the following key components:
+        </p>
+        <ul>
+            <li><strong>Data Collection:</strong> The dataset used for this project consists of various dishes and their corresponding cuisines. It is represented in a CSV file named <code>cuisines.csv</code>.</li>
+            <li><strong>Data Preprocessing:</strong> Data is cleaned and transformed to create feature vectors for each dish. Ingredients are processed to form the basis for classification.</li>
+            <li><strong>Model Training:</strong> A Logistic Regression model is trained on the preprocessed data. The model is evaluated for accuracy and performance.</li>
+            <li><strong>Application:</strong> A web-based application is built using Flask and Streamlit, allowing users to predict the cuisine based on the ingredients they select.</li>
+        </ul>
+
+        <h4>Technologies Used</h4>
+        <ul>
+            <li><strong>Python:</strong> For data processing and machine learning model implementation.</li>
+            <li><strong>Scikit-learn:</strong> For building and evaluating the Logistic Regression model.</li>
+            <li><strong>Pandas & Numpy:</strong> For data manipulation and numerical operations.</li>
+            <li><strong>Matplotlib:</strong> For data visualization.</li>
+            <li><strong>SWEETALERT:</strong> For user-friendly alert messages on the web application.</li>
+            <li><strong>Flask & Streamlit:</strong> For creating the web interface for the model.</li>
+        </ul>
+
+        <h4>Contact Information</h4>
+        <p>
+            For any inquiries or feedback regarding this project, please reach out to:
+        </p>
+        <p><strong>Email:</strong> [Your Email Address]</p>
+        <p><strong>Phone:</strong> [Your Phone Number]</p>
+    </div>
+</div>
+{% endblock %}

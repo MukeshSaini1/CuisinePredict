@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Cuisine Prediction Result{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Cuisine Prediction Result</h2>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Cuisine</th>
+                    <th>Probability</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cuisine, probability in result.items() %}
+                <tr>
+                    <td>{{ cuisine }}</td>
+                    <td>{{ (probability * 100) | round(2) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Pie Chart Container -->
+        <div class="chart-container mt-4">
+            <canvas id="cuisineChart"></canvas>
+        </div>
+
+        <br>
+        <a href="/" class="btn btn-primary btn-block">Predict Again</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+    var ctx = document.getElementById('cuisineChart').getContext('2d');
+    var cuisineChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: [{% for cuisine in result.keys() %}"{{ cuisine }}",{% endfor %}],
+            datasets: [{
+                data: [{% for probability in result.values() %}{{ (probability * 100) | round(2) }},{% endfor %}],
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                ],
+                hoverBackgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                datalabels: {
+                    color: '#ffffff',
+                    font: {
+                        weight: 'bold',
+                        size: 16,
+                    },
+                    formatter: function(value, context) {
+                        return value + '%';
+                    },
+                    anchor: 'center',
+                    align: 'center',
+                }
+            },
+            title: {
+                display: true,
+                text: 'Cuisine Prediction Probability Distribution'
+            },
+            tooltips: {
+                enabled: true,
+                backgroundColor: '#000000',
+                titleFontSize: 20,
+                bodyFontSize: 30,
+                xPadding: 15,
+                yPadding: 15,
+                cornerRadius: 10,
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var label = data.labels[tooltipItem.index] || '';
+                        var value = data.datasets[0].data[tooltipItem.index] || 0;
+                        return label + ': ' + value + '%';
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
